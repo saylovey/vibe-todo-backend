@@ -1,24 +1,10 @@
 import express from 'express';
-import mongoose from 'mongoose';
 import Todo from '../models/Todo.js';
 
 const router = express.Router();
 
-// MongoDB 연결 확인 미들웨어
-const checkMongoConnection = (req, res, next) => {
-  if (mongoose.connection.readyState !== 1) {
-    return res.status(503).json({ 
-      error: '데이터베이스 연결 안됨', 
-      message: 'MongoDB에 연결되어 있지 않습니다. 잠시 후 다시 시도해주세요.',
-      mongodbStatus: mongoose.connection.readyState === 0 ? 'disconnected' : 
-                     mongoose.connection.readyState === 2 ? 'connecting' : 'disconnecting'
-    });
-  }
-  next();
-};
-
 // 할일 생성
-router.post('/', checkMongoConnection, async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { title, description, completed } = req.body;
 
@@ -40,7 +26,7 @@ router.post('/', checkMongoConnection, async (req, res) => {
 });
 
 // 할일 목록 조회
-router.get('/', checkMongoConnection, async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const todos = await Todo.find().sort({ createdAt: -1 });
     res.json(todos);
@@ -50,7 +36,7 @@ router.get('/', checkMongoConnection, async (req, res) => {
 });
 
 // 특정 할일 조회
-router.get('/:id', checkMongoConnection, async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const todo = await Todo.findById(req.params.id);
 
@@ -68,7 +54,7 @@ router.get('/:id', checkMongoConnection, async (req, res) => {
 });
 
 // 할일 수정
-router.put('/:id', checkMongoConnection, async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     const { title, description, completed } = req.body;
     const updateData = {};
@@ -97,7 +83,7 @@ router.put('/:id', checkMongoConnection, async (req, res) => {
 });
 
 // 할일 삭제
-router.delete('/:id', checkMongoConnection, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     const todo = await Todo.findByIdAndDelete(req.params.id);
 
